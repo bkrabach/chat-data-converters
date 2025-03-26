@@ -10,14 +10,16 @@ output_dir = os.path.join(os.getcwd(), "output")
 os.makedirs(output_dir, exist_ok=True)
 
 # Get a list of all JSON files in the input directory
-json_files = [f for f in os.listdir(input_dir) if f.endswith('.json')]
+json_files = [f for f in os.listdir(input_dir) if f.endswith(".json")]
+
 
 # Sort the files by date (assuming the date is part of the filename)
 def extract_date(filename):
     try:
-        return datetime.strptime(filename.split('-')[1], '%Y%m%d%H%M%S')
+        return datetime.strptime(filename.split("-")[1], "%Y%m%d%H%M%S")
     except (IndexError, ValueError):
         return datetime.min
+
 
 json_files.sort(key=extract_date)
 
@@ -29,9 +31,12 @@ for json_file in json_files:
     with open(input_file, "r", encoding="utf-8") as file:
         data = json.load(file)
 
+    if "conversations" in data:
+        data = data["conversations"]
+
     # Process each chat
     for chat in data:
-        chat_name = chat.get("name", "Unnamed Chat").replace(" ", "_").replace("\"", "")
+        chat_name = chat.get("name", "Unnamed Chat").replace(" ", "_").replace('"', "")
         chat_messages = chat.get("chat_messages", [])
 
         # Skip empty conversations
@@ -39,7 +44,7 @@ for json_file in json_files:
             continue
 
         # Sort messages by created_at or updated_at timestamp
-        chat_messages.sort(key=lambda x: x.get('created_at', x.get('updated_at', '')))
+        chat_messages.sort(key=lambda x: x.get("created_at", x.get("updated_at", "")))
 
         # Define the output file path
         output_file = os.path.join(output_dir, f"{chat_name}.txt")
